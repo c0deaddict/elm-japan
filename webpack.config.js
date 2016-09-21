@@ -44,6 +44,19 @@ module.exports = {
     noParse: /\.elm$/,
   },
 
+  resolve: {
+    modulesDirectories: ['node_modules', 'lib'],
+    alias: {
+      'seriously': 'seriously/seriously.js'
+    }
+  },
+
+  resolveLoader: {
+    alias: {
+      "seriously": path.join(__dirname, "./test")
+    }
+  },
+
   devServer: {
     inline: true,
     stats: { colors: true },
