@@ -40,15 +40,15 @@ var app = Elm.Main.embed(mountNode);
     .then(function(devices) {
       devices.forEach(function(device) {
         if (device.kind == 'videoinput') {
-          var n = document.createElement('div');
-          n.appendChild(document.createTextNode(device.label + " id = " + device.deviceId));
+          var n = document.createElement('button');
+          n.appendChild(document.createTextNode(device.label));
           n.addEventListener('click', function() {
             navigator.mediaDevices.getUserMedia({ video: { deviceId: device.deviceId } }).then(function(stream) {
                 video.src = window.URL.createObjectURL(stream);
                 video.play();
             });
           });
-          document.body.appendChild(n);
+          document.getElementById('videoSelection').appendChild(n);
         }
       });
     });
@@ -61,6 +61,31 @@ var app = Elm.Main.embed(mountNode);
 
   // Trigger photo take
   document.getElementById("snapButton").addEventListener("click", function() {
-  	context.drawImage(video, 0, 0, 640, 480);
+  	context.drawImage(video, 0, 0, canvas.width, canvas.height);
+    var imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+    var data = imageData.data;
+
+    var grayscale = function() {
+      var sum = 0;
+      for (var i = 0; i < data.length; i += 4) {
+        sum += (data[i] + data[i + 1] + data[i +2]) / 3;
+      }
+
+      var avg = sum / (data.length / 4);
+
+      for (var i = 0; i < data.length; i += 4) {
+        var gray = (data[i] + data[i + 1] + data[i +2]) / 3;
+        var color = gray < avg * 0.80 ? 0 : 255;
+        data[i]     = color;
+        data[i + 1] = color;
+        data[i + 2] = color;
+      }
+
+      context.putImageData(imageData, 0, 0);
+    };
+
+    console.log('converting image to grayscale...');
+    grayscale();
+    console.log('done');
   });
 })();
