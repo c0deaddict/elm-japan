@@ -15,7 +15,6 @@ var app = Elm.Main.embed(mountNode);
 require('seriously');
 require('../lib/seriously/sources/seriously.camera.js')
 require('../lib/seriously/effects/seriously.edge.js');
-require('../lib/seriously/effects/seriously.ascii.js');
 
 (function() {
   //main code goes here
@@ -24,19 +23,50 @@ require('../lib/seriously/effects/seriously.ascii.js');
     source, // wrapper object for source video
     edge, // edge detection effect
     target; // a wrapper object for our target canvas
+
+  function log(text) {
+    document.body.appendChild(document.createTextNode(text));
+    document.body.appendChild(document.createElement('br'));
+  }
+
+  if (!navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices) {
+    log("enumerateDevices() not supported.");
+    return;
+  }
+
+  // List cameras and microphones.
+
+  navigator.mediaDevices.enumerateDevices()
+    .then(function(devices) {
+      devices.forEach(function(device) {
+        if (device.kind == 'videoinput') {
+          log(device.label + " id = " + device.deviceId);
+        }
+      });
+    })
+    .catch(function(err) {
+      log(err.name + ": " + error.message);
+    });
+
   if (Seriously.incompatible('camera')) {
-    document.body.appendChild(document.createTextNode('Sorry, your browser does not support getUserMedia'));
+    log('Sorry, your browser does not support getUserMedia');
     document.querySelector('canvas').style.display = 'none';
     return;
   }
+
   // construct our seriously object
   seriously = new Seriously();
   // time to get serious
-  source = seriously.source('camera');
+  source = seriously.source('camera', {
+      video: {
+          facingMode: "back"
+      }
+    });
   target = seriously.target('#target');
-  edge = seriously.effect('ascii');
+  //edge = seriously.effect('edge');
   // connect all our nodes in the right order
-  edge.source = source;
-  target.source = edge;
+  //edge.source = source;
+  //target.source = edge;
+  target.source = source;
   seriously.go();
 }());
