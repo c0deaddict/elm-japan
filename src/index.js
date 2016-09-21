@@ -63,10 +63,9 @@ require('../lib/seriously/effects/seriously.edge.js');
       }
     });
   target = seriously.target('#target');
-  //edge = seriously.effect('edge');
+  edge = seriously.effect('edge');
   // connect all our nodes in the right order
-  //edge.source = source;
-  //target.source = edge;
-  target.source = source;
+  edge.source = source;
+  target.source = edge;
   seriously.go();
 }());
